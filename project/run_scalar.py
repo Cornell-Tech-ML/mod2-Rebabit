@@ -5,13 +5,25 @@ Be sure you have minitorch installed in you Virtual Env.
 
 import random
 
+import math
+import numpy as np
+from pathlib import Path
+import sys
+
+import streamlit as st
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
 import minitorch
 
 
 class Network(minitorch.Module):
     def __init__(self, hidden_layers):
         super().__init__()
-        raise NotImplementedError("Need to include this file from past assignment.")
+        # TODO: Implement for Task 1.5.
+        self.layer1 = Linear(2, hidden_layers)
+        self.layer2 = Linear(hidden_layers, hidden_layers)
+        self.layer3 = Linear(hidden_layers, 1)
 
     def forward(self, x):
         middle = [h.relu() for h in self.layer1.forward(x)]
@@ -24,12 +36,13 @@ class Linear(minitorch.Module):
         super().__init__()
         self.weights = []
         self.bias = []
+        xavier_weights = Linear.get_xavier_weights(in_size, out_size)
         for i in range(in_size):
             self.weights.append([])
             for j in range(out_size):
                 self.weights[i].append(
                     self.add_parameter(
-                        f"weight_{i}_{j}", minitorch.Scalar(2 * (random.random() - 0.5))
+                        f"weight_{i}_{j}", minitorch.Scalar(xavier_weights[i * out_size + j])
                     )
                 )
         for j in range(out_size):
@@ -38,9 +51,34 @@ class Linear(minitorch.Module):
                     f"bias_{j}", minitorch.Scalar(2 * (random.random() - 0.5))
                 )
             )
+    @staticmethod
+    def get_xavier_weights(fan_in: int, fan_out: int):
+        n = fan_in * fan_out
+        random_weights = np.random.uniform(low=-1.0, high=1.0, size=n)
 
+        # Adjust the mean to be exactly 0
+        actual_mean = np.mean(random_weights)
+        xavier_weights = random_weights - actual_mean
+
+        # Calculate desired variance
+        desired_variance = 2/ (fan_in + fan_out)
+
+        # Adjust the variance to be the desired variance
+        actual_variance = np.var(xavier_weights)
+        scaling_factor = np.sqrt(desired_variance / actual_variance)
+        xavier_weights = xavier_weights * scaling_factor
+
+        return xavier_weights
     def forward(self, inputs):
-        raise NotImplementedError("Need to include this file from past assignment.")
+        # TODO: Implement for Task 1.5.
+        outputs = []
+        for j in range(len(self.bias)):
+            out = self.bias[j].value
+            for i in range(len(self.weights)):
+                # print(f"Weight: {self.weights[i][j]}, Input: {inputs[i]}")
+                out += self.weights[i][j].value * inputs[i]
+            outputs.append(out)
+        return outputs
 
 
 def default_log_fn(epoch, total_loss, correct, losses):
