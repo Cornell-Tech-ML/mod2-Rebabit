@@ -45,7 +45,10 @@ def index_to_position(index: Index, strides: Strides) -> int:
 
     """
     # TODO: Implement for Task 2.1.
-    raise NotImplementedError("Need to implement for Task 2.1")
+    postion = 0
+    for idx, stride in zip(index, strides):
+        postion += idx * stride
+    return postion
 
 
 def to_index(ordinal: int, shape: Shape, out_index: OutIndex) -> None:
@@ -61,7 +64,9 @@ def to_index(ordinal: int, shape: Shape, out_index: OutIndex) -> None:
 
     """
     # TODO: Implement for Task 2.1.
-    raise NotImplementedError("Need to implement for Task 2.1")
+    for i in reversed(range(len(shape))):
+        out_index[i] = ordinal % shape[i]
+        ordinal = ordinal // shape[i]
 
 
 def broadcast_index(
@@ -84,7 +89,18 @@ def broadcast_index(
 
     """
     # TODO: Implement for Task 2.2.
-    raise NotImplementedError("Need to implement for Task 2.2")
+    # Purpose: broadcast_index is used to convert an index in a broadcasted (larger) tensor back to the index of the original (smaller) tensor.
+    # e.g. map from broadcasted (4,3,2) to original (3,2) tensor to get the correct value.
+    lenBig, lenSmall = len(big_index), len(shape)
+    # Align the shapes by prepending 1s to the smaller shape if necessary
+    # Map each dimension's index according to broadcasting rules
+    if lenSmall < lenBig:
+        shape = (1,) * (lenBig - lenSmall) + shape
+    for i in range(len(shape)):
+        if shape[i] == 1:
+            out_index[i] = 0 
+        else:
+            out_index[i] = big_index[i]
 
 
 def shape_broadcast(shape1: UserShape, shape2: UserShape) -> UserShape:
@@ -102,7 +118,23 @@ def shape_broadcast(shape1: UserShape, shape2: UserShape) -> UserShape:
 
     """
     # TODO: Implement for Task 2.2.
-    raise NotImplementedError("Need to implement for Task 2.2")
+    shape1, shape2 = tuple(shape1), tuple(shape2)
+    len1, len2 = len(shape1), len(shape2)
+    if len1 < len2:
+        shape1 = (1,) * (len2 - len1) + shape1
+    else:
+        shape2 = (1,) * (len1 - len2) + shape2
+    broadcasted_shape = []
+    for dim1, dim2 in zip(shape1, shape2):
+        if dim1 == dim2:
+            broadcasted_shape.append(dim1)
+        elif dim1 == 1:
+            broadcasted_shape.append(dim2)
+        elif dim2 == 1:
+            broadcasted_shape.append(dim1)
+        else:
+            raise IndexingError(f"Shapes {shape1} and {shape2} are not broadcastable.")
+    return tuple(broadcasted_shape)
 
 
 def strides_from_shape(shape: UserShape) -> UserStrides:
@@ -232,7 +264,9 @@ class TensorData:
         ), f"Must give a position to each dimension. Shape: {self.shape} Order: {order}"
 
         # TODO: Implement for Task 2.1.
-        raise NotImplementedError("Need to implement for Task 2.1")
+        permuted_shape = tuple(self.shape[i] for i in order)
+        permuted_strides = tuple(self.strides[i] for i in order)
+        return TensorData(self._storage, permuted_shape, permuted_strides)
 
     def to_string(self) -> str:
         """Convert to string"""
