@@ -22,14 +22,13 @@ The files that will be synced are:
 ## Simple Dataset
 ### Hyperparameters
     POINTS = 50
-    HIDDEN LAYER = 2
+    HIDDEN LAYER = 5
     LEARNING RATE = 0.05
     EPOCH = 1000
 ### Training Logs
-![alt text](fig/image.png)
-![alt text](fig/image1.png)
+![alt text](fig/image-2.png)
 ### Final Images
-![alt text](fig/image3.png)
+![alt text](fig/image11.png)
 
 ## Diag Dataset
 
@@ -65,6 +64,6 @@ The files that will be synced are:
     EPOCH = 1000
 
 ### Training Logs
-![alt text](image-1.png)
+![alt text](fig/image9.png)
 ### Final Images
-![alt text](image.png)
+![alt text](fig/image10.png)
