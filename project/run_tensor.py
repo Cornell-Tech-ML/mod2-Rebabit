@@ -30,7 +30,7 @@ class Linear(minitorch.Module):
         # Step 2: Perform element-wise multiplication between the expanded input and the weights
         temp = input_expanded * self.weights.value # shape: (batch_size, in_features, out_features)
         # Step 3: Sum across the in_features dimension (dim=1) to simulate matrix multiplication
-        temp = temp.sum(dim=1) # shape: (batch_size, 1, out_features)  
+        temp = temp.sum(dim=1) # shape: (batch_size, 1, out_features)
         temp = temp + self.bias.value
         return temp.view(temp.shape[0], temp.shape[2]) # shape: (batch_size, out_features)
 
@@ -41,7 +41,7 @@ class Network(minitorch.Module):
         self.layer1 = Linear(2, hidden_layers)
         self.layer2 = Linear(hidden_layers, hidden_layers)
         self.layer3 = Linear(hidden_layers, 1)
-    
+
     def forward(self, x):
         x = self.layer1.forward(x).relu()
         x = self.layer2.forward(x).relu()

@@ -17,3 +17,54 @@ python sync_previous_module.py previous-module-dir current-module-dir
 The files that will be synced are:
 
         minitorch/operators.py minitorch/module.py minitorch/autodiff.py minitorch/scalar.py minitorch/scalar_functions.py minitorch/module.py project/run_manual.py project/run_scalar.py project/datasets.py
+
+# Training Results
+## Simple Dataset
+### Hyperparameters
+    POINTS = 50
+    HIDDEN LAYER = 2
+    LEARNING RATE = 0.05
+    EPOCH = 1000
+### Training Logs
+![alt text](fig/image.png)
+![alt text](fig/image1.png)
+### Final Images
+![alt text](fig/image3.png)
+
+## Diag Dataset
+
+### Hyperparameters
+    POINTS = 50
+    HIDDEN LAYER = 5
+    LEARNING RATE = 0.05
+    EPOCH = 1500
+### Training Logs
+![alt text](fig/image5.png)
+### Final Images
+![alt text](fig/image4.png)
+
+## Split Dataset
+
+### Hyperparameters
+    POINTS = 50
+    HIDDEN LAYER = 10
+    LEARNING RATE = 0.05
+    EPOCH = 1000
+
+### Training Logs
+![alt text](fig/image6.png)
+### Final Images
+![alt text](fig/image7.png)
+
+## Split Dataset
+
+### Hyperparameters
+    POINTS = 50
+    HIDDEN LAYER = 30
+    LEARNING RATE = 0.05
+    EPOCH = 1000
+
+### Training Logs
+![alt text](image-1.png)
+### Final Images
+![alt text](image.png)

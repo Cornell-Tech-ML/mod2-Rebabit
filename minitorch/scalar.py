@@ -130,7 +130,9 @@ class Scalar:
 
         # TODO: Implement for Task 1.3.
         # get the local gradients using chain rule
-        local_grads = h.last_fn._backward(h.ctx, d_output) # computes the local gradients of the current variable with respect to its inputs using the chain rule
+        local_grads = h.last_fn._backward(
+            h.ctx, d_output
+        )  # computes the local gradients of the current variable with respect to its inputs using the chain rule
         assert len(local_grads) == len(h.inputs), "Local gradients must match inputs."
 
         # pair each input with its gradient
@@ -139,7 +141,7 @@ class Scalar:
             # If the input variable is not a constant (i.e., it requires gradient calculation)
             if not input_var.is_constant():  # if the input is not a constant
                 result.append((input_var, local_grad))
-        return result # Return the list of input-gradient pairs
+        return result  # Return the list of input-gradient pairs
 
     def backward(self, d_output: Optional[float] = None) -> None:
         """Calls autodiff to fill in the derivatives for the history of this object.
