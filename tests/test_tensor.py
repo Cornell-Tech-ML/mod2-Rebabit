@@ -164,7 +164,9 @@ def test_permute_view() -> None:
     t = tensor([[2, 3, 4], [4, 5, 7]])
     assert t.shape == (2, 3)
     t2 = t.permute(1, 0)
+    # print("t2:", t2)
     t2.view(6)
+    # print("t2:", t2)
 
 
 @pytest.mark.xfail

@@ -355,18 +355,15 @@ class Tensor:
     
     def sum(self, dim: Optional[int] = None) -> Tensor:
         if dim is None:
-            return Sum.apply(self)
+            return Sum.apply(self.contiguous().view(int(operators.prod(self.shape))),self._ensure_tensor(0))
         return Sum.apply(self, Tensor.make([dim], (1,), backend=self.backend))
     
     def mean(self, dim: Optional[int] = None) -> Tensor:
         if dim is None:
-            dim = 0
-        sum_result = self.sum(dim)
-        divisor = [1] * self.dims
-        divisor[dim] = self.shape[dim]
-        divisor_tensor = Tensor.make(list(divisor), (self.dims,), backend=self.backend)
-        return sum_result / divisor_tensor
-    
+            return self.sum(dim) / self.size
+        else:
+            return self.sum(dim) / self.shape[dim]
+
     def permute(self, *dims: int) -> Tensor:
         dims_tensor= Tensor.make(list(dims), (len(dims),), backend=self.backend)
         return Permute.apply(self, dims_tensor)
@@ -375,5 +372,5 @@ class Tensor:
         shape_tensor = Tensor.make(list(shape), (len(shape),), backend=self.backend)
         return View.apply(self, shape_tensor)
     
-    def zero_grad(self) -> None:
+    def zero_grad_(self) -> None:
         self.grad = None
