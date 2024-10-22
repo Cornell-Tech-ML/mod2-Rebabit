@@ -89,18 +89,25 @@ def broadcast_index(
 
     """
     # TODO: Implement for Task 2.2.
-    # Purpose: broadcast_index is used to convert an index in a broadcasted (larger) tensor back to the index of the original (smaller) tensor.
-    # e.g. map from broadcasted (4,3,2) to original (3,2) tensor to get the correct value.
-    lenBig, lenSmall = len(big_index), len(shape)
-    # Align the shapes by prepending 1s to the smaller shape if necessary
-    # Map each dimension's index according to broadcasting rules
-    if lenSmall < lenBig:
-        shape = (1,) * (lenBig - lenSmall) + shape
+    # # Purpose: broadcast_index is used to convert an index in a broadcasted (larger) tensor back to the index of the original (smaller) tensor.
+    # # e.g. map from broadcasted (4,3,2) to original (3,2) tensor to get the correct value.
+    # lenBig, lenSmall = len(big_shape), len(shape)
+    # # Align the shapes by prepending 1s to the smaller shape if necessary
+    # # Map each dimension's index according to broadcasting rules
+    # dim_offset = lenBig - lenSmall
+    # for i in range(lenBig):
+    #     if shape[i] == 1:
+    #         out_index[i] = 0 
+    #     else:
+    #         out_index[i] = big_index[i+dim_offset]
+
+    # Ensure the smaller tensor shape can broadcast to the bigger tensor shape
+    dim_offset = len(big_shape) - len(shape)
     for i in range(len(shape)):
-        if shape[i] == 1:
-            out_index[i] = 0 
-        else:
-            out_index[i] = big_index[i]
+       if shape[i] == 1:
+           out_index[i] = 0
+       else:
+           out_index[i] = big_index[i + dim_offset]
 
 
 def shape_broadcast(shape1: UserShape, shape2: UserShape) -> UserShape:

@@ -365,19 +365,16 @@ def tensor_reduce(
         out_index = np.zeros(len(out_shape), dtype=np.int32)
         for ordinal in range(int(operators.prod(out_shape))):
             to_index(ordinal,out_shape,out_index)
-            broadcast_index(out_index, out_shape, a_shape, a_index)
-            # Initialize `result` with the first element along the `reduce_dim` dimension
-            # Set the index for `reduce_dim` to 0 to start the reduction with the first element in that dimension
+            # Copy the output index to the input index for all dimensions except reduce_dim
+            for i in range(len(out_shape)):
+                a_index[i] = out_index[i]
             a_index[reduce_dim] = 0 
             result = a_storage[index_to_position(a_index, a_strides)]
-            # Traverse the remaining elements along the `reduce_dim` dimension
-            # Start from 1 (since 0 was already used to initialize `result`) and apply the reduction function `fn`
             for i in range(1, a_shape[reduce_dim]):
                 a_index[reduce_dim] = i
                 a_position = index_to_position(a_index,a_strides)
                 result = fn(result, a_storage[a_position])
-            out_position = index_to_position(out_index, out_strides)
-            out[out_position] = result
+            out[ordinal] = result
 
     return _reduce
 
