@@ -164,7 +164,9 @@ def test_permute_view() -> None:
     t = tensor([[2, 3, 4], [4, 5, 7]])
     assert t.shape == (2, 3)
     t2 = t.permute(1, 0)
+    # print("t2:", t2)
     t2.view(6)
+    # print("t2:", t2)
 
 
 @pytest.mark.xfail
@@ -194,7 +196,7 @@ def test_reduce_forward_one_dim() -> None:
 
     # here 0 means to reduce the 0th dim, 3 -> nothing
     t_summed = t.sum(0)
-
+    print("t_summed", t_summed)
     # shape (2)
     t_sum_expected = tensor([[11, 16]])
     assert t_summed.is_close(t_sum_expected).all().item()
@@ -207,9 +209,12 @@ def test_reduce_forward_one_dim_2() -> None:
 
     # here 1 means reduce the 1st dim, 2 -> nothing
     t_summed_2 = t.sum(1)
-
+    print("t_summed_2", t_summed_2)
     # shape (3)
     t_sum_2_expected = tensor([[5], [10], [12]])
+    print(t_summed_2.is_close(t_sum_2_expected))
+    print(t_summed_2.is_close(t_sum_2_expected).all())
+    print(t_summed_2.is_close(t_sum_2_expected).all().item())
     assert t_summed_2.is_close(t_sum_2_expected).all().item()
 
 

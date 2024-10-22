@@ -30,7 +30,6 @@ from .tensor_functions import (
     Sigmoid,
     Sum,
     View,
-    tensor,
 )
 
 if TYPE_CHECKING:
@@ -95,9 +94,11 @@ class Tensor:
         self.f = backend
 
     def requires_grad_(self, x: bool) -> None:
+        """Set the requires_grad flag of this tensor."""
         self.history = History()
 
     def requires_grad(self) -> bool:
+        """Returns whether this tensor requires gradients."""
         return self.history is not None
 
     def to_numpy(self) -> npt.NDArray[np.float64]:
@@ -153,7 +154,20 @@ class Tensor:
         strides: Optional[UserStrides] = None,
         backend: Optional[TensorBackend] = None,
     ) -> Tensor:
-        """Create a new tensor from data"""
+        """Create a new tensor from data
+
+        Args:
+        ----
+            storage : data for tensor
+            shape : shape of tensor
+            strides : strides of tensor
+            backend : tensor backend
+
+        Returns:
+        -------
+            New tensor
+
+        """
         return Tensor(TensorData(storage, shape, strides), backend=backend)
 
     def expand(self, other: Tensor) -> Tensor:
@@ -194,6 +208,8 @@ class Tensor:
         # END CODE CHANGE (2021)
 
     def zeros(self, shape: Optional[UserShape] = None) -> Tensor:
+        """Create a new tensor of zeros with the same shape as this tensor."""
+
         def zero(shape: UserShape) -> Tensor:
             return Tensor.make(
                 [0.0] * int(operators.prod(shape)), shape, backend=self.backend
@@ -239,14 +255,17 @@ class Tensor:
         return self.history is not None and self.history.last_fn is None
 
     def is_constant(self) -> bool:
+        """True if this variable is a constant (no `requires_grad`)"""
         return self.history is None
 
     @property
     def parents(self) -> Iterable[Variable]:
+        """Returns the parents of this variable (if any)"""
         assert self.history is not None
         return self.history.inputs
 
     def chain_rule(self, d_output: Any) -> Iterable[Tuple[Variable, Any]]:
+        """Compute the chain rule for this variable."""
         h = self.history
         assert h is not None
         assert h.last_fn is not None
@@ -260,6 +279,7 @@ class Tensor:
         ]
 
     def backward(self, grad_output: Optional[Tensor] = None) -> None:
+        """Backpropagate gradients through the computation graph."""
         if grad_output is None:
             assert self.shape == (1,), "Must provide grad_output if non-scalar"
             grad_output = Tensor.make([1.0], (1,), backend=self.backend)
@@ -285,3 +305,96 @@ class Tensor:
 
     # Functions
     # TODO: Implement for Task 2.3.
+    @property
+    def size(self) -> int:
+        """Returns the total number of elements in the tensor."""
+        return int(operators.prod(self.shape))
+
+    @property
+    def dims(self) -> int:
+        """Returns the number of dimensions of the tensor."""
+        return len(self.shape)
+
+    def __add__(self, b: TensorLike) -> Tensor:
+        # use _ensure_tensor to make sure the input provided is converted to tensor for operation
+        return Add.apply(self, self._ensure_tensor(b))
+
+    def __sub__(self, b: TensorLike) -> Tensor:
+        return Add.apply(self, Neg.apply(self._ensure_tensor(b)))
+
+    def __mul__(self, b: TensorLike) -> Tensor:
+        return Mul.apply(self, self._ensure_tensor(b))
+
+    def __lt__(self, b: TensorLike) -> Tensor:
+        return LT.apply(self, self._ensure_tensor(b))
+
+    def __eq__(self, b: TensorLike) -> Tensor:
+        return EQ.apply(self, self._ensure_tensor(b))
+
+    def __gt__(self, b: TensorLike) -> Tensor:
+        return LT.apply(self._ensure_tensor(b), self)
+
+    def __neg__(self) -> Tensor:
+        return Neg.apply(self)
+
+    def __radd__(self, b: TensorLike) -> Tensor:
+        return Add.apply(self._ensure_tensor(b), self)
+
+    def __rmul__(self, b: TensorLike) -> Tensor:
+        return Mul.apply(self._ensure_tensor(b), self)
+
+    def all(self, dim: Optional[int] = None) -> Tensor:
+        """Returns True if all elements are True. [1,1,1] -> True, [1,0,1] -> False"""
+        if dim is None:
+            return All.apply(self)
+        return All.apply(self, self._ensure_tensor(dim))
+
+    def is_close(self, b: TensorLike) -> Tensor:
+        """Returns True if all elements are close to b."""
+        return IsClose.apply(self, self._ensure_tensor(b))
+
+    def sigmoid(self) -> Tensor:
+        """Returns the sigmoid of the tensor."""
+        return Sigmoid.apply(self)
+
+    def relu(self) -> Tensor:
+        """Returns the ReLU of the tensor."""
+        return ReLU.apply(self)
+
+    def log(self) -> Tensor:
+        """Returns the natural log of the tensor."""
+        return Log.apply(self)
+
+    def exp(self) -> Tensor:
+        """Returns the exponential of the tensor."""
+        return Exp.apply(self)
+
+    def sum(self, dim: Optional[int] = None) -> Tensor:
+        """Returns the sum of the tensor."""
+        if dim is None:
+            return Sum.apply(
+                self.contiguous().view(int(operators.prod(self.shape))),
+                self._ensure_tensor(0),
+            )
+        return Sum.apply(self, Tensor.make([dim], (1,), backend=self.backend))
+
+    def mean(self, dim: Optional[int] = None) -> Tensor:
+        """Returns the mean of the tensor."""
+        if dim is None:
+            return self.sum(dim) / self.size
+        else:
+            return self.sum(dim) / self.shape[dim]
+
+    def permute(self, *dims: int) -> Tensor:
+        """Returns a tensor that has the dimensions permuted."""
+        dims_tensor = Tensor.make(list(dims), (len(dims),), backend=self.backend)
+        return Permute.apply(self, dims_tensor)
+
+    def view(self, *shape: int) -> Tensor:
+        """Returns a tensor with the same data but different shape."""
+        shape_tensor = Tensor.make(list(shape), (len(shape),), backend=self.backend)
+        return View.apply(self, shape_tensor)
+
+    def zero_grad_(self) -> None:
+        """Zero out the gradient values of all parameters."""
+        self.grad = None
